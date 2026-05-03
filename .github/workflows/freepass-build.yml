@@ -9,11 +9,13 @@ jobs:
         with:
           submodules: false
 
-      - name: Fix submodule URLs
+      - name: Clone hiddify-core without ray2sing
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
           git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
-          git submodule update --init --recursive
+          git submodule update --init hiddify-core || true
+          cd hiddify-core
+          git submodule update --init hiddify-sing-box || true
 
       - uses: subosito/flutter-action@v2
         with:
