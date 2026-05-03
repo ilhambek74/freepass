@@ -5,14 +5,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Fix submodule URLs
+        run: git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.38.5'
           channel: 'stable'
           cache: true
+
       - name: Create key.properties
         run: |
           echo "${{ secrets.KEY_JKS }}" | base64 -d > android/key.jks
@@ -20,8 +26,10 @@ jobs:
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
           echo "storeFile=../key.jks" >> android/key.properties
+
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
